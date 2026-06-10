@@ -12,24 +12,47 @@ class GameController:
         self.screen = pygame.display.set_mode((c.SCREEN_WIDTH, c.SCREEN_HEIGHT))
         pygame.display.set_caption("Minimal Soccer")
 
-        self.ball = Ball(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2)#ボールの生成
+        self.clock = pygame.time.Clock()
+
+        self.ball = Ball(pygame.math.Vector2(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))#ボールの生成
         
-        self.player = Player(c.SCREEN_WIDTH // 4, c.SCREEN_HEIGHT // 2)
+        self.player = Player(pygame.math.Vector2(c.SCREEN_WIDTH // 4, c.SCREEN_HEIGHT // 2))
+
+        self.field_rect = pygame.Rect(0, 0, c.FIELD_WIDTH, c.FIELD_HEIGHT)
+        self.field_rect.center = self.screen.get_rect().center
+
+    def resolve_collisions(self): #衝突をまとめて解決
+        self._check_wall_and_ball()
+
+    def _check_wall_and_ball(self):
+        if self.ball.pos.x - c.BALL_SIZE < self.field_rect.left or self.field_rect.right < self.ball.pos.x + c.BALL_SIZE:
+            self.ball.velocity.x = -self.ball.velocity.x
+        if self.ball.pos.y - c.BALL_SIZE < self.field_rect.top or self.field_rect.bottom < self.ball.pos.y + c.BALL_SIZE:
+            self.ball.velocity.y = -self.ball.velocity.y
 
     def display(self):
         self.screen.fill(c.GRASS_COLOR)
-        pygame.draw.circle(self.screen, c.WHITE, (self.ball.x, self.ball.y), c.BALL_SIZE)#ボールの表示
-        pygame.draw.circle(self.screen, c.RED, (self.player.x, self.player.y), c.PLAYER_SIZE)#プレイヤーの表示
-        pygame.display.update()
+        self.player.draw(self.screen)
+        self.ball.draw(self.screen)
+
+        pygame.draw.rect(self.screen, c.WHITE, self.field_rect, 3)
+        
+        pygame.display.flip()
 
     def play_game(self):
-        self.display()
-
         running = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+
+            self.resolve_collisions()
+
+            dt = self.clock.tick(c.FPS) / 1000.0
+            self.ball.update(dt)
+
+            self.display()
+
         pygame.quit()
         sys.exit()
 
