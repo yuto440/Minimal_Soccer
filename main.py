@@ -23,12 +23,18 @@ class GameController:
 
     def resolve_collisions(self): #衝突をまとめて解決
         self._check_wall_and_ball()
+        self._check_player_and_ball()
 
     def _check_wall_and_ball(self):
-        if self.ball.pos.x - c.BALL_SIZE < self.field_rect.left or self.field_rect.right < self.ball.pos.x + c.BALL_SIZE:
+        if self.ball.pos.x - c.BALL_RADIUS < self.field_rect.left or self.field_rect.right < self.ball.pos.x + c.BALL_RADIUS:
             self.ball.velocity.x = -self.ball.velocity.x
-        if self.ball.pos.y - c.BALL_SIZE < self.field_rect.top or self.field_rect.bottom < self.ball.pos.y + c.BALL_SIZE:
+        if self.ball.pos.y - c.BALL_RADIUS < self.field_rect.top or self.field_rect.bottom < self.ball.pos.y + c.BALL_RADIUS:
             self.ball.velocity.y = -self.ball.velocity.y
+
+    def _check_player_and_ball(self):
+        pass
+
+        
 
     def display(self):
         self.screen.fill(c.GRASS_COLOR)

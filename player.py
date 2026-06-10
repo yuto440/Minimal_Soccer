@@ -16,4 +16,4 @@ class Player:
         self.pos += self.velocity * dt
 
     def draw(self, screen):
-        pygame.draw.circle(screen, c.RED, (self.pos.x, self.pos.y), c.PLAYER_SIZE)
+        pygame.draw.circle(screen, c.RED, (self.pos.x, self.pos.y), c.PLAYER_RADIUS)
