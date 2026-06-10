@@ -8,6 +8,8 @@ BALL_SIZE = 25
 
 PLAYER_SIZE = 40
 
+PLAYER_SPEED = 80
+
 FPS = 60
 
 #色

@@ -48,8 +48,11 @@ class GameController:
 
             self.resolve_collisions()
 
+            self.player.think(self.ball.pos)
+
             dt = self.clock.tick(c.FPS) / 1000.0
             self.ball.update(dt)
+            self.player.update(dt)
 
             self.display()
 
