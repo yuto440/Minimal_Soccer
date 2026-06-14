@@ -26,15 +26,45 @@ class GameController:
         self._check_player_and_ball()
 
     def _check_wall_and_ball(self):
-        if self.ball.pos.x - c.BALL_RADIUS < self.field_rect.left or self.field_rect.right < self.ball.pos.x + c.BALL_RADIUS:
+        if self.ball.pos.x - c.BALL_RADIUS < self.field_rect.left:
+            self.ball.pos.x = self.field_rect.left + c.BALL_RADIUS
             self.ball.velocity.x = -self.ball.velocity.x
-        if self.ball.pos.y - c.BALL_RADIUS < self.field_rect.top or self.field_rect.bottom < self.ball.pos.y + c.BALL_RADIUS:
+        elif self.ball.pos.x + c.BALL_RADIUS > self.field_rect.right:
+            self.ball.pos.x = self.field_rect.right - c.BALL_RADIUS
+            self.ball.velocity.x = -self.ball.velocity.x
+        if self.ball.pos.y - c.BALL_RADIUS < self.field_rect.top:
+            self.ball.pos.y = self.field_rect.top + c.BALL_RADIUS
+            self.ball.velocity.y = -self.ball.velocity.y
+        elif self.ball.pos.y + c.BALL_RADIUS > self.field_rect.bottom:
+            self.ball.pos.y = self.field_rect.bottom - c.BALL_RADIUS
             self.ball.velocity.y = -self.ball.velocity.y
 
     def _check_player_and_ball(self):
-        pass
+        player_to_ball = self.ball.pos - self.player.pos
+        distance = player_to_ball.length()
 
-        
+        min_distance = c.PLAYER_RADIUS + c.BALL_RADIUS
+
+        if distance < min_distance:#衝突判定
+            if distance > 0:#ゼロベクトルでなければ正規化
+                n_player_to_ball = player_to_ball.normalize()
+            else:
+                n_player_to_ball = pygame.math.Vector2(1, 0)
+
+            #重なっている分を移動
+            overlap = min_distance - distance
+            self.ball.pos += n_player_to_ball * overlap
+
+            relative_velocity = self.ball.velocity - self.player.velocity
+
+            #相対速度と正規化した相対位置の内積
+            v_dot_n = relative_velocity.dot(n_player_to_ball)
+
+            #遠ざかる方向へ、つまりv_dot_nがプラスになる方向へ速度を変更
+            if v_dot_n < 0:
+                self.ball.velocity -= (1.0 + c.ELASTICITY) * n_player_to_ball * v_dot_n
+            
+            self.player.trigger_knockback(n_player_to_ball)
 
     def display(self):
         self.screen.fill(c.GRASS_COLOR)
