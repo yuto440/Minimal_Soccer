@@ -6,6 +6,8 @@ class Player:
         self.pos = pos
         self.velocity = pygame.math.Vector2(0, 0)
 
+        self.color = c.BLACK
+
         self.knockback_timer = 0
 
     def think(self, ball_pos: pygame.math.Vector2):
@@ -28,4 +30,4 @@ class Player:
         self.pos += self.velocity * dt
 
     def draw(self, screen):
-        pygame.draw.circle(screen, c.RED, (self.pos.x, self.pos.y), c.PLAYER_RADIUS)
+        pygame.draw.circle(screen, self.color, (self.pos.x, self.pos.y), c.PLAYER_RADIUS)
