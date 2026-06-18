@@ -17,12 +17,12 @@ class GameController:
 
         self.ball = Ball(pygame.math.Vector2(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))#ボールの生成
 
-        self.teams = [Team(c.RED), Team(c.BLUE)]
+        self.teams = [Team(c.TeamID.TEAM_A, c.RED), Team(c.TeamID.TEAM_B, c.BLUE)]
         
-        self.players = [Player(pygame.math.Vector2(c.SCREEN_WIDTH // 4, c.SCREEN_HEIGHT // 2)),
-                          Player(pygame.math.Vector2(c.SCREEN_WIDTH // 4, 3 * c.SCREEN_HEIGHT // 4)),
-                          Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH // 4, c.SCREEN_HEIGHT // 4)),
-                          Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH // 4, 3 * c.SCREEN_HEIGHT // 4))]
+        self.players = [Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 2)),
+                          Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4)),
+                          Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 4)),
+                          Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4))]
         self.num_players = len(self.players)
 
         self.teams[0].add_player(self.players[0])
