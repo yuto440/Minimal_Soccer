@@ -33,18 +33,28 @@ class GameController:
         self.field_rect = pygame.Rect(0, 0, c.FIELD_WIDTH, c.FIELD_HEIGHT)
         self.field_rect.center = self.screen.get_rect().center
 
+    def reset(self):
+        for player in self.players:
+            player.reset()
+        self.ball.pos = pygame.math.Vector2(self.field_rect.center)
+        self.ball.velocity = pygame.math.Vector2(0, 0)
+
     def resolve_collisions(self): #衝突をまとめて解決
         self._check_wall_and_ball()
         self._check_player_and_ball()
         self._check_player_and_player()
 
     def _check_wall_and_ball(self):
+        #左右の壁との衝突。ゴールはすり抜ける
         if self.ball.pos.x - c.BALL_RADIUS < self.field_rect.left:
-            self.ball.pos.x = self.field_rect.left + c.BALL_RADIUS
-            self.ball.velocity.x = -self.ball.velocity.x
+            if self.ball.pos.y < (c.SCREEN_HEIGHT - c.GOAL_WIDTH) / 2 or self.ball.pos.y > (c.SCREEN_HEIGHT + c.GOAL_WIDTH) / 2:
+                self.ball.pos.x = self.field_rect.left + c.BALL_RADIUS
+                self.ball.velocity.x = -self.ball.velocity.x
         elif self.ball.pos.x + c.BALL_RADIUS > self.field_rect.right:
-            self.ball.pos.x = self.field_rect.right - c.BALL_RADIUS
-            self.ball.velocity.x = -self.ball.velocity.x
+            if self.ball.pos.y < (c.SCREEN_HEIGHT - c.GOAL_WIDTH) / 2 or self.ball.pos.y > (c.SCREEN_HEIGHT + c.GOAL_WIDTH) / 2:
+                self.ball.pos.x = self.field_rect.right - c.BALL_RADIUS
+                self.ball.velocity.x = -self.ball.velocity.x
+        #上下の壁との衝突
         if self.ball.pos.y - c.BALL_RADIUS < self.field_rect.top:
             self.ball.pos.y = self.field_rect.top + c.BALL_RADIUS
             self.ball.velocity.y = -self.ball.velocity.y
@@ -101,7 +111,13 @@ class GameController:
                     player_0.pos -= n_p0_to_p1 * overlap / 2
                     player_1.pos += n_p0_to_p1 * overlap / 2
 
-                
+    def goal_check(self):
+        if self.ball.pos.x + c.BALL_RADIUS < self.field_rect.left:
+            self.teams[0].score +=1
+            self.reset()
+        elif self.ball.pos.x - c.BALL_RADIUS> self.field_rect.right:
+            self.teams[1].score +=1
+            self.reset()
                 
 
     def display(self):
@@ -122,7 +138,7 @@ class GameController:
                     running = False
 
             self.resolve_collisions()
-
+            self.goal_check()
             dt = self.clock.tick(c.FPS) / 1000.0
             self.ball.update(dt)
             

@@ -4,7 +4,7 @@ import constants as c
 class Ball:
     def __init__(self, pos):
         self.pos = pos
-        self.velocity = pygame.math.Vector2(100, 100)
+        self.velocity = pygame.math.Vector2(0, 0)
 
     def update(self, dt):
         self.apply_friction(dt)

@@ -2,13 +2,19 @@ import pygame
 import constants as c
 
 class Player:
-    def __init__(self, pos):
+    def __init__(self, pos:pygame.math.Vector2):
         self.pos = pos
+        self.initial_pos = pygame.math.Vector2(pos)
+
         self.velocity = pygame.math.Vector2(0, 0)
 
         self.color = c.BLACK
 
         self.knockback_timer = 0
+
+    def reset(self):
+        self.pos = pygame.math.Vector2(self.initial_pos)
+        self.velocity = pygame.math.Vector2(0, 0)
 
     def think(self, ball_pos: pygame.math.Vector2):
         if self.knockback_timer > 0:
