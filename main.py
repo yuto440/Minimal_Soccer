@@ -33,6 +33,11 @@ class GameController:
         self.field_rect = pygame.Rect(0, 0, c.FIELD_WIDTH, c.FIELD_HEIGHT)
         self.field_rect.center = self.screen.get_rect().center
 
+        self.post_poses = [pygame.math.Vector2(self.field_rect.left, self.field_rect.centery - c.GOAL_WIDTH / 2),
+                    pygame.math.Vector2(self.field_rect.left, self.field_rect.centery + c.GOAL_WIDTH / 2),
+                    pygame.math.Vector2(self.field_rect.right, self.field_rect.centery - c.GOAL_WIDTH / 2),
+                    pygame.math.Vector2(self.field_rect.right, self.field_rect.centery + c.GOAL_WIDTH / 2)]
+
     def reset(self):
         for player in self.players:
             player.reset()
@@ -41,6 +46,7 @@ class GameController:
 
     def resolve_collisions(self): #衝突をまとめて解決
         self._check_wall_and_ball()
+        self._check_posts_and_ball()
         self._check_player_and_ball()
         self._check_player_and_player()
 
@@ -61,6 +67,26 @@ class GameController:
         elif self.ball.pos.y + c.BALL_RADIUS > self.field_rect.bottom:
             self.ball.pos.y = self.field_rect.bottom - c.BALL_RADIUS
             self.ball.velocity.y = -self.ball.velocity.y
+
+    def _check_posts_and_ball(self):
+        for post_pos in self.post_poses:
+            post_to_ball = self.ball.pos - post_pos
+            distance = post_to_ball.length()
+
+            if distance < c.BALL_RADIUS:
+                print("post")
+
+                if distance > 0:
+                    n_post_to_ball = post_to_ball.normalize()
+                else:
+                    n_post_to_ball = pygame.math.Vector2(1, 0)
+
+                overlap = c.BALL_RADIUS - distance
+                self.ball.pos += n_post_to_ball * overlap
+
+                v_dot_n = self.ball.velocity.dot(n_post_to_ball)
+                if v_dot_n < 0:
+                    self.ball.velocity -= 2 * v_dot_n * n_post_to_ball
 
     def _check_player_and_ball(self):
         for player in self.players:
@@ -126,7 +152,17 @@ class GameController:
             player.draw(self.screen)
         self.ball.draw(self.screen)
 
+        # pygame.draw.line(self.screen, c.WHITE, self.field_rect.topright, self.field_rect.topleft, 3)
+        # pygame.draw.line(self.screen, c.WHITE, self.field_rect.bottomright, self.field_rect.bottomleft, 3)
+        # pygame.draw.line(self.screen, c.WHITE, self.field_rect.topleft, self.post_poses[0], 3)
+        # pygame.draw.line(self.screen, c.WHITE, self.field_rect.bottomleft, self.post_poses[1], 3)
+        # pygame.draw.line(self.screen, c.WHITE, self.field_rect.topright, self.post_poses[2], 3)
+        # pygame.draw.line(self.screen, c.WHITE, self.field_rect.bottomright, self.post_poses[3], 3)
+
         pygame.draw.rect(self.screen, c.WHITE, self.field_rect, 3)
+        
+        for post_pos in self.post_poses:
+            pygame.draw.circle(self.screen, c.WHITE, post_pos, 10)
         
         pygame.display.flip()
 
