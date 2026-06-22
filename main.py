@@ -15,15 +15,17 @@ class GameController:
 
         self.clock = pygame.time.Clock()
 
-        self.ball = Ball(pygame.math.Vector2(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))#ボールの生成
+        self.ball: Ball = Ball(pygame.math.Vector2(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))  # ボールの生成
 
-        self.teams = [Team(c.TeamID.TEAM_A, c.RED), Team(c.TeamID.TEAM_B, c.BLUE)]
-        
-        self.players = [Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 2)),
-                          Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4)),
-                          Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 4)),
-                          Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4))]
-        self.num_players = len(self.players)
+        self.teams: list[Team] = [Team(c.TeamID.TEAM_A, c.RED), Team(c.TeamID.TEAM_B, c.BLUE)]
+
+        self.players: list[Player] = [
+            Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 2)),
+            Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4)),
+            Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 4)),
+            Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4)),
+        ]
+        self.num_players: int = len(self.players)
 
         self.teams[0].add_player(self.players[0])
         self.teams[0].add_player(self.players[1])
@@ -33,22 +35,26 @@ class GameController:
         self.field_rect = pygame.Rect(0, 0, c.FIELD_WIDTH, c.FIELD_HEIGHT)
         self.field_rect.center = self.screen.get_rect().center
 
-        self.post_poses = [pygame.math.Vector2(self.field_rect.left, self.field_rect.centery - c.GOAL_WIDTH / 2),
-                    pygame.math.Vector2(self.field_rect.left, self.field_rect.centery + c.GOAL_WIDTH / 2),
-                    pygame.math.Vector2(self.field_rect.right, self.field_rect.centery - c.GOAL_WIDTH / 2),
-                    pygame.math.Vector2(self.field_rect.right, self.field_rect.centery + c.GOAL_WIDTH / 2)]
+        self.post_poses: list[pygame.math.Vector2] = [
+            pygame.math.Vector2(self.field_rect.left, self.field_rect.centery - c.GOAL_WIDTH / 2),
+            pygame.math.Vector2(self.field_rect.left, self.field_rect.centery + c.GOAL_WIDTH / 2),
+            pygame.math.Vector2(self.field_rect.right, self.field_rect.centery - c.GOAL_WIDTH / 2),
+            pygame.math.Vector2(self.field_rect.right, self.field_rect.centery + c.GOAL_WIDTH / 2),
+        ]
 
     def reset(self):
         for player in self.players:
             player.reset()
         self.ball.pos = pygame.math.Vector2(self.field_rect.center)
         self.ball.velocity = pygame.math.Vector2(0, 0)
+        return None
 
     def resolve_collisions(self): #衝突をまとめて解決
         self._check_wall_and_ball()
         self._check_posts_and_ball()
         self._check_player_and_ball()
         self._check_player_and_player()
+        return None
 
     def _check_wall_and_ball(self):
         #左右の壁との衝突。ゴールはすり抜ける
@@ -71,17 +77,20 @@ class GameController:
     def _check_posts_and_ball(self):
         for post_pos in self.post_poses:
             post_to_ball = self.ball.pos - post_pos
-            distance = post_to_ball.length()
+            dist_sq = post_to_ball.length_squared()
+            radius = c.BALL_RADIUS
 
-            if distance < c.BALL_RADIUS:
+            if dist_sq < radius * radius:
                 print("post")
 
-                if distance > 0:
-                    n_post_to_ball = post_to_ball.normalize()
+                if dist_sq > 0:
+                    distance = dist_sq ** 0.5
+                    n_post_to_ball = post_to_ball / distance
                 else:
                     n_post_to_ball = pygame.math.Vector2(1, 0)
+                    distance = 0
 
-                overlap = c.BALL_RADIUS - distance
+                overlap = radius - distance
                 self.ball.pos += n_post_to_ball * overlap
 
                 v_dot_n = self.ball.velocity.dot(n_post_to_ball)
@@ -91,15 +100,17 @@ class GameController:
     def _check_player_and_ball(self):
         for player in self.players:
             player_to_ball = self.ball.pos - player.pos
-            distance = player_to_ball.length()
+            dist_sq = player_to_ball.length_squared()
 
             min_distance = c.PLAYER_RADIUS + c.BALL_RADIUS
 
-            if distance < min_distance:#衝突判定
-                if distance > 0:#ゼロベクトルでなければ正規化
-                    n_player_to_ball = player_to_ball.normalize()
+            if dist_sq < min_distance * min_distance: #衝突判定
+                if dist_sq > 0: #ゼロベクトルでなければ正規化
+                    distance = dist_sq ** 0.5
+                    n_player_to_ball = player_to_ball / distance
                 else:
                     n_player_to_ball = pygame.math.Vector2(1, 0)
+                    distance = 0
 
                 #重なっている分を移動
                 overlap = min_distance - distance
@@ -113,7 +124,7 @@ class GameController:
                 #遠ざかる方向へ、つまりv_dot_nがプラスになる方向へ速度を変更
                 if v_dot_n < 0:
                     self.ball.velocity -= (1.0 + c.ELASTICITY) * n_player_to_ball * v_dot_n
-                
+
                 player.trigger_knockback(n_player_to_ball)
     def _check_player_and_player(self):
         for i in range(0, self.num_players - 1):
@@ -122,15 +133,17 @@ class GameController:
                 player_1 = self.players[j]
 
                 p0_to_p1 = player_1.pos - player_0.pos
-                distance = p0_to_p1.length()
+                dist_sq = p0_to_p1.length_squared()
 
                 min_distance = c.PLAYER_RADIUS * 2
 
-                if distance < min_distance:
-                    if distance > 0:
-                        n_p0_to_p1 = p0_to_p1.normalize()
+                if dist_sq < min_distance * min_distance:
+                    if dist_sq > 0:
+                        distance = dist_sq ** 0.5
+                        n_p0_to_p1 = p0_to_p1 / distance
                     else:
                         n_p0_to_p1 = pygame.math.Vector2(1, 0)
+                        distance = 0
 
                     overlap = min_distance - distance
 
@@ -144,6 +157,7 @@ class GameController:
         elif self.ball.pos.x - c.BALL_RADIUS> self.field_rect.right:
             self.teams[1].score +=1
             self.reset()
+        return None
                 
 
     def display(self):
@@ -162,9 +176,10 @@ class GameController:
         pygame.draw.rect(self.screen, c.WHITE, self.field_rect, 3)
         
         for post_pos in self.post_poses:
-            pygame.draw.circle(self.screen, c.WHITE, post_pos, 10)
+            pygame.draw.circle(self.screen, c.WHITE, (int(post_pos.x), int(post_pos.y)), 10)
         
         pygame.display.flip()
+        return None
 
     def play_game(self):
         running = True
@@ -186,6 +201,8 @@ class GameController:
 
         pygame.quit()
         sys.exit()
+
+        return None
 
 if __name__ == "__main__":
     gm = GameController()

@@ -2,20 +2,21 @@ import pygame
 import constants as c
 
 class Ball:
-    def __init__(self, pos):
-        self.pos = pos
-        self.velocity = pygame.math.Vector2(0, 0)
+    def __init__(self, pos: pygame.math.Vector2) -> None:
+        self.pos: pygame.math.Vector2 = pos
+        self.velocity: pygame.math.Vector2 = pygame.math.Vector2(0, 0)
 
-    def update(self, dt):
+    def update(self, dt: float) -> None:
         self.apply_friction(dt)
         self.pos += self.velocity * dt
 
-    def apply_friction(self, dt):
-        speed = self.velocity.length()
+    def apply_friction(self, dt: float) -> None:
+        speed_sq = self.velocity.length_squared()
 
-        if speed == 0:
+        if speed_sq == 0:
             return
-        
+
+        speed = speed_sq ** 0.5
         deceleration = c.BALL_FRICTION_ACCEL * dt
 
         if speed < deceleration:
@@ -23,5 +24,5 @@ class Ball:
         else:
             self.velocity = self.velocity.normalize() * (speed - deceleration)
         
-    def draw(self, screen):
-        pygame.draw.circle(screen, c.WHITE, (self.pos.x, self.pos.y), c.BALL_RADIUS)
+    def draw(self, screen: "pygame.Surface") -> None:
+        pygame.draw.circle(screen, c.WHITE, (int(self.pos.x), int(self.pos.y)), c.BALL_RADIUS)
