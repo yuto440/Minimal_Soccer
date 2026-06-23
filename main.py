@@ -42,6 +42,8 @@ class GameController:
             pygame.math.Vector2(self.field_rect.right, self.field_rect.centery + c.GOAL_WIDTH / 2),
         ]
 
+        self.score_font = pygame.font.Font(None, 70)
+
     def reset(self):
         for player in self.players:
             player.reset()
@@ -152,19 +154,20 @@ class GameController:
 
     def goal_check(self):
         if self.ball.pos.x + c.BALL_RADIUS < self.field_rect.left:
-            self.teams[0].score +=1
+            self.teams[1].score +=1
             self.reset()
         elif self.ball.pos.x - c.BALL_RADIUS> self.field_rect.right:
-            self.teams[1].score +=1
+            self.teams[0].score +=1
             self.reset()
         return None
                 
 
     def display(self):
         self.screen.fill(c.GRASS_COLOR)
-        for player in self.players:
-            player.draw(self.screen)
-        self.ball.draw(self.screen)
+
+        pygame.draw.line(self.screen, c.WHITE, (self.field_rect.centerx, self.field_rect.top), (self.field_rect.centerx, self.field_rect.bottom), c.LINE_WIDTH)
+        pygame.draw.circle(self.screen, c.WHITE, self.field_rect.center, c.FIELD_HEIGHT // 4, c.LINE_WIDTH)
+        pygame.draw.circle(self.screen, c.WHITE, self.field_rect.center, c.LINE_WIDTH * 2)
 
         # pygame.draw.line(self.screen, c.WHITE, self.field_rect.topright, self.field_rect.topleft, 3)
         # pygame.draw.line(self.screen, c.WHITE, self.field_rect.bottomright, self.field_rect.bottomleft, 3)
@@ -173,10 +176,21 @@ class GameController:
         # pygame.draw.line(self.screen, c.WHITE, self.field_rect.topright, self.post_poses[2], 3)
         # pygame.draw.line(self.screen, c.WHITE, self.field_rect.bottomright, self.post_poses[3], 3)
 
-        pygame.draw.rect(self.screen, c.WHITE, self.field_rect, 3)
+        pygame.draw.rect(self.screen, c.WHITE, self.field_rect, c.LINE_WIDTH)
         
         for post_pos in self.post_poses:
-            pygame.draw.circle(self.screen, c.WHITE, (int(post_pos.x), int(post_pos.y)), 10)
+            pygame.draw.circle(self.screen, c.WHITE, (int(post_pos.x), int(post_pos.y)), c.LINE_WIDTH * 3)
+
+        score_text = f"{self.teams[0].score} - {self.teams[1].score}"
+        score_surface = self.score_font.render(score_text, True, c.WHITE)
+        score_rect = score_surface.get_rect()
+        score_rect.centerx = self.field_rect.centerx
+        self.screen.blit(score_surface, score_rect)
+
+        for player in self.players:
+            player.draw(self.screen)
+        self.ball.draw(self.screen)
+
         
         pygame.display.flip()
         return None
