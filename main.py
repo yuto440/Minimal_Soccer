@@ -83,7 +83,7 @@ class GameController:
             radius = c.BALL_RADIUS
 
             if dist_sq < radius * radius:
-                print("post")
+                #print("post")
 
                 if dist_sq > 0:
                     distance = dist_sq ** 0.5
@@ -208,7 +208,9 @@ class GameController:
             self.ball.update(dt)
             
             for player in self.players:
-                player.think(self.ball.pos)
+                player.update_ai(self.ball)
+
+            for player in self.players:
                 player.update(dt)
 
             self.display()
