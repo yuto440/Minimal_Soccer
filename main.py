@@ -23,11 +23,22 @@ class GameController:
 
         self.teams: list[Team] = [Team(c.TeamID.TEAM_A, self.field_rect.right , c.RED), Team(c.TeamID.TEAM_B, self.field_rect.left ,c.BLUE)]
 
+
+        positions = []#フィールドを９×５のグリッドに分ける。プレイヤーの初期座標はこれで指定。
+        for row in range(9):
+            row_positions = []
+            for col in range(5):
+                x = self.field_rect.left + c.FIELD_WIDTH / 10 * (row + 1)
+                y = self.field_rect.top + c.FIELD_HEIGHT / 6 * (col + 1)
+
+                row_positions.append(pygame.math.Vector2(x, y))
+            positions.append(row_positions)
+
         self.players: list[Player] = [
-            Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 2)),
-            Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4)),
-            Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 4)),
-            Player(pygame.math.Vector2(3 * c.SCREEN_WIDTH / 4, 3 * c.SCREEN_HEIGHT / 4)),
+            Player(positions[1][1]),
+            Player(positions[1][3]),
+            Player(positions[7][1]),
+            Player(positions[7][3]),
         ]
         self.num_players: int = len(self.players)
 

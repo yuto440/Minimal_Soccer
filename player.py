@@ -8,7 +8,7 @@ from typing import Any
 class Player:
     def __init__(self, pos: pygame.math.Vector2) -> None:
         self.pos: pygame.math.Vector2 = pos
-        self.initial_pos: pygame.math.Vector2 = pygame.math.Vector2(pos)
+        self.initial_pos: pygame.math.Vector2 = pygame.math.Vector2(self.pos)
 
         self.velocity: pygame.math.Vector2 = pygame.math.Vector2(0, 0)
 
@@ -22,6 +22,7 @@ class Player:
     def reset(self) -> None:
         self.pos = pygame.math.Vector2(self.initial_pos)
         self.velocity = pygame.math.Vector2(0, 0)
+        self.knockback_timer = 0
 
     def think(self, ball_info: BallInfo, player_infos: list[PlayerInfo]) -> None:
         to_ball = ball_info.pos - self.pos
