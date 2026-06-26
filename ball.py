@@ -26,3 +26,16 @@ class Ball:
         
     def draw(self, screen: "pygame.Surface") -> None:
         pygame.draw.circle(screen, c.WHITE, (int(self.pos.x), int(self.pos.y)), c.BALL_RADIUS)
+
+
+class BallInfo:
+    def __init__(self, ball: Ball):
+        self._ball = ball
+
+    @property
+    def pos(self):
+        return self._ball.pos
+    
+    @property
+    def velocity(self):
+        return self._ball.velocity

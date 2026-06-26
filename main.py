@@ -1,8 +1,8 @@
 import pygame
 import sys
 import constants as c
-from ball import Ball
-from player import Player
+from ball import *
+from player import *
 from team import Team
 
 class GameController:
@@ -15,9 +15,13 @@ class GameController:
 
         self.clock = pygame.time.Clock()
 
-        self.ball: Ball = Ball(pygame.math.Vector2(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))  # ボールの生成
+        self.field_rect = pygame.Rect(0, 0, c.FIELD_WIDTH, c.FIELD_HEIGHT)
+        self.field_rect.center = self.screen.get_rect().center
 
-        self.teams: list[Team] = [Team(c.TeamID.TEAM_A, c.RED), Team(c.TeamID.TEAM_B, c.BLUE)]
+        self.ball: Ball = Ball(pygame.math.Vector2(c.SCREEN_WIDTH // 2, c.SCREEN_HEIGHT // 2))  # ボールの生成
+        self.ball_info = BallInfo(self.ball)
+
+        self.teams: list[Team] = [Team(c.TeamID.TEAM_A, self.field_rect.right , c.RED), Team(c.TeamID.TEAM_B, self.field_rect.left ,c.BLUE)]
 
         self.players: list[Player] = [
             Player(pygame.math.Vector2(c.SCREEN_WIDTH / 4, c.SCREEN_HEIGHT / 2)),
@@ -32,8 +36,9 @@ class GameController:
         self.teams[1].add_player(self.players[2])
         self.teams[1].add_player(self.players[3])
 
-        self.field_rect = pygame.Rect(0, 0, c.FIELD_WIDTH, c.FIELD_HEIGHT)
-        self.field_rect.center = self.screen.get_rect().center
+        self.player_infos: list[PlayerInfo] = [PlayerInfo(player) for player in self.players]
+
+
 
         self.post_poses: list[pygame.math.Vector2] = [
             pygame.math.Vector2(self.field_rect.left, self.field_rect.centery - c.GOAL_WIDTH / 2),
@@ -153,10 +158,10 @@ class GameController:
                     player_1.pos += n_p0_to_p1 * overlap / 2
 
     def goal_check(self):
-        if self.ball.pos.x + c.BALL_RADIUS < self.field_rect.left:
+        if self.ball.pos.x + c.BALL_RADIUS < self.teams[1].goal_pos_x:
             self.teams[1].score +=1
             self.reset()
-        elif self.ball.pos.x - c.BALL_RADIUS> self.field_rect.right:
+        elif self.ball.pos.x - c.BALL_RADIUS> self.teams[0].goal_pos_x:
             self.teams[0].score +=1
             self.reset()
         return None
@@ -208,7 +213,7 @@ class GameController:
             self.ball.update(dt)
             
             for player in self.players:
-                player.update_ai(self.ball)
+                player.update_ai(self.ball_info, self.player_infos)
 
             for player in self.players:
                 player.update(dt)
