@@ -8,7 +8,7 @@ from typing import Any
 class Player:
     def __init__(self, pos: pygame.math.Vector2) -> None:
         self.pos: pygame.math.Vector2 = pos
-        self.initial_pos: pygame.math.Vector2 = pygame.math.Vector2(self.pos)
+        self.initial_pos: pygame.math.Vector2 = pygame.math.Vector2(pos)
 
         self.velocity: pygame.math.Vector2 = pygame.math.Vector2(0, 0)
 

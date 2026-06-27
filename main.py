@@ -4,6 +4,8 @@ import constants as c
 from ball import *
 from player import *
 from team import Team
+from ai_player import FSMPlayer
+import random
 
 class GameController:
     def __init__(self):
@@ -35,17 +37,21 @@ class GameController:
             positions.append(row_positions)
 
         self.players: list[Player] = [
-            Player(positions[1][1]),
-            Player(positions[1][3]),
-            Player(positions[7][1]),
-            Player(positions[7][3]),
+            FSMPlayer(positions[1][0]),
+            FSMPlayer(positions[1][4]),
+            FSMPlayer(positions[3][2]),
+            FSMPlayer(positions[7][0]),
+            FSMPlayer(positions[7][4]),
+            FSMPlayer(positions[5][2])
         ]
         self.num_players: int = len(self.players)
 
         self.teams[0].add_player(self.players[0])
         self.teams[0].add_player(self.players[1])
-        self.teams[1].add_player(self.players[2])
+        self.teams[0].add_player(self.players[2])
         self.teams[1].add_player(self.players[3])
+        self.teams[1].add_player(self.players[4])
+        self.teams[1].add_player(self.players[5])
 
         self.player_infos: list[PlayerInfo] = [PlayerInfo(player) for player in self.players]
 
@@ -142,6 +148,9 @@ class GameController:
                 #遠ざかる方向へ、つまりv_dot_nがプラスになる方向へ速度を変更
                 if v_dot_n < 0:
                     self.ball.velocity -= (1.0 + c.ELASTICITY) * n_player_to_ball * v_dot_n
+                    #ランダムに少しずれを作る
+                    random_angle = random.uniform(-1, 1)
+                    self.ball.velocity = self.ball.velocity.rotate(random_angle)
 
                 player.trigger_knockback(n_player_to_ball)
     def _check_player_and_player(self):
