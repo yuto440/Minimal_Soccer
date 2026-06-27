@@ -35,10 +35,13 @@ class FSMPlayer(Player):
                     n_to_ball = to_ball.normalize()
                     moving_away_speed = ball_info.velocity.dot(n_to_ball)
 
-                    if moving_away_speed < 0:#速度の遠ざかる方向がプラスかどうか
+                    if moving_away_speed < -150:
+                        t = 0.0
+                    elif moving_away_speed < 20:#速度の遠ざかる方向がプラスかどうか
                         t = -moving_away_speed / c.PLAYER_SPEED
+                    
                 else: 
-                    t = 0.0
+                    t = 0.5
 
                 predicted_ball_pos = ball_info.pos + ball_info.velocity * t
                 to_target = predicted_ball_pos - self.pos
